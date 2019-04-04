@@ -1,2 +1,4 @@
+# Auto detect text files and perform LF normalization
+* text=auto
 *.zip filter=lfs diff=lfs merge=lfs -text
 Assets/Materials/Custom[[:space:]]Textures/Interior_Wood_1_basecolor_MaxColorIntensity_MinLightness.png filter=lfs diff=lfs merge=lfs -text
