@@ -143,6 +143,11 @@ public class colourCodeModScript : MonoBehaviour {
         }
 
 
+        int thirdDigit=0;
+        int bit1=(BombInfo.GetBatteryCount()+2)*BombInfo.GetSolvedModuleNames().Count();
+        int bit2=bit1-(BombInfo.GetOnIndicators()>BombInfo.GetOffIndicators()?15:0);
+        int bit3=bit2+(backgroundColour=="red"?150:0);
+        int bit4=bit3/(bit3%3==0?3:1);
         
     }
 
