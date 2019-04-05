@@ -20,6 +20,7 @@ public class colourCodeModScript : MonoBehaviour {
     public GameObject[] screenPieces;
 
     private String[] answerText;
+    private String backgroundColour;
 
     int solvedModules;
 
@@ -148,7 +149,64 @@ public class colourCodeModScript : MonoBehaviour {
         int bit2=bit1-(BombInfo.GetOnIndicators()>BombInfo.GetOffIndicators()?15:0);
         int bit3=bit2+(backgroundColour=="red"?150:0);
         int bit4=bit3/(bit3%3==0?3:1);
-        
+        int bit5=bit4%10;
+        int bit6=bit5*(BombInfo.GetSerialNumber().First().Equals("0")?2:1);
+        int bit7=bit6*(BombInfo.GetSerialNumber().Second().Equals("0")?4:1);
+        int bit8=bit7%10;
+        thirdDigit=bit8;
+        // only allow if the last seconds digit is the code digit
+
+
+
+        int fourthDigit=0;
+        int bob1=100-(firstDigit+secondDigit+thirdDigit);
+        int bob2=bob1-(getTotalModuleCountByName("Colour Code")+(BombInfo.GetSolvableModuleNames().Count()-BombInfo.GetSolvedModuleNames().Count());
+        int bob3=bob2+BombInfo.GetOffIndicators();
+        int bob4=bob3%10;
+        fourthDigit=bob4;
+
+
+
+        String firstColour="purple"; // default to purple
+        if(backgroundColour=="red" && BombInfo.GetPortCount()==0 && BombInfo.GetIndicators()==0 && BombInfo.GetSolvedModuleNames().Count()==0) {
+            firstColour="red";
+        } else if(backgroundColour=="orange" && BombInfo.GetSerialNumberDigits().Sum()%10==BombInfo.GetBatteryCount()) {
+            firstColour="orange";
+        } else if(backgroundColour=="green" && BombInfo.GetPortCount()>BombInfo.GetOffIndicators()) {
+            firstColour="green";
+        } else if(backgroundColour=="yellow" && BombInfo.GetOffIndicators()==1 && BombInfo.GetSerialNumberDigits().Last()%2==1) {
+            firstColour="yellow";
+        } else if(backgroundColour=="blue" && BombInfo.GetBatteryCount()==BombInfo.GetSolvedModuleNames().Count()) {
+            firstColour="blue";
+        }
+
+
+
+        String secondColour="purple"; // default to purple
+        if(BombInfo.GetSerialNumberDigits().Last()%2==0) {
+            secondColour="blue";
+        } else if(BombInfo.GetPortCount(Port.Parallel)>0) {
+            secondColour="green";
+        } else if((BombInfo.GetBatteryCount()+BombInfo.GetSerialNumberDigits().Sum())<=5) {
+            secondColour="orange";
+        } else if(BombInfo.GetBatteryCount(Battery.AA)==BombInfo.GetBatteryCount()) {
+            secondColour="red";
+        } else if(backgroundColour=="yellow") {
+            secondColour="yellow";
+        }
+
+
+
+        String thirdColour="purple";
+        int bar1=(BombInfo.GetSolvableModuleNames().Count()-BombInfo.GetSolvedModuleNames().Count())*BombInfo.GetSolvedModuleNames().Count();
+        int bar2=bar1/(bar1%3==0?3:1);
+        int bar3=bar2%10;
+        int bar4=bar3*(firstColour=="purple"?2:1);
+        int bar5=bar4*(secondColour=="purple"?4:1);
+        int bar6=bar5%10;
+        int bar7=bar6*BombInfo.GetBatteryCount();
+        int bar8=bar7%6; // I removed the +1 so 0=orange instead of 1=orange
+        String[] colourNumberConvertor={"orange","blue","red","purple","yellow","green"};
     }
 
     void PressButton(int buttonId) {
@@ -158,6 +216,8 @@ public class colourCodeModScript : MonoBehaviour {
         if (moduleSolved) {
             return;
         }
+
+        
 
         if (buttonId == 11) {
             myText = myText.PadLeft(6, '0');
