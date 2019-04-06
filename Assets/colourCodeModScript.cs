@@ -24,8 +24,8 @@ public class colourCodeModScript : MonoBehaviour {
     private String myText="";
     private List<object> screenText=new List<object>();
     private String answerText;
-    private List<String> finalText;
-    private List<String> answerOrder;
+    private List<String> finalText=new List<String>();
+    private List<String> answerOrder=new List<String>();
     private String backgroundColour;
 
     int solvedModules;
@@ -39,6 +39,8 @@ public class colourCodeModScript : MonoBehaviour {
         moduleId = moduleIdCounter++;
 
         CalculateCorrectAnswer();
+        CalculateDigitOrder();
+        PrepareCorrectAnswer();
 
         for (int i = 0; i < NumberedButtons.Length; i++) {
             int j = i;
@@ -70,8 +72,10 @@ public class colourCodeModScript : MonoBehaviour {
         };
     }
 
+    int LastModulesSolved=0;
+
     void Update() {
-        if (!moduleSolved) {
+        if (!moduleSolved&&LastModulesSolved!=BombInfo.GetSolvedModuleNames().Count()) {
             CalculateCorrectAnswer();
             CalculateDigitOrder();
             PrepareCorrectAnswer();
@@ -156,7 +160,7 @@ public class colourCodeModScript : MonoBehaviour {
         int bit6=bit5*(BombInfo.GetSerialNumber().First().Equals("0")?2:1);
         int bit7=bit6*(BombInfo.GetSerialNumber()[1].Equals("0")?4:1);
         int bit8=bit7%10;
-        thirdDigit=bit8;
+        thirdDigit=Math.Abs(bit8);
         // only allow if the last seconds digit is the code digit
 
 
@@ -222,10 +226,10 @@ public class colourCodeModScript : MonoBehaviour {
         allTheDigits.Add(firstColour);
         allTheDigits.Add(secondColour);
         allTheDigits.Add(thirdColour);
-        doLog("Digit 1 = "+firstDigit.toString());
-        doLog("Digit 2 = "+secondDigit.toString());
-        doLog("Digit 3 = "+thirdDigit.toString());
-        doLog("Digit 4 = "+fourthDigit.toString());
+        doLog("Digit 1 = "+firstDigit.ToString());
+        doLog("Digit 2 = "+secondDigit.ToString());
+        doLog("Digit 3 = "+thirdDigit.ToString());
+        doLog("Digit 4 = "+fourthDigit.ToString());
         doLog("Colour 1 = "+firstColour);
         doLog("Colour 2 = "+secondColour);
         doLog("Colour 3 = "+thirdColour);
@@ -258,7 +262,7 @@ public class colourCodeModScript : MonoBehaviour {
         if(!con2) answerOrder.Add("colour");
         if(!con1) answerOrder.Add("digit");
 
-        doLog("Order of digits conditions = "+con1.toString()+" "+con2.toString()+" "+con3.toString()+" "+con4.toString()+" "+con5.toString()+" "+con6.toString()+" "+con7.toString()+" ");
+        doLog("Order of digits conditions = "+con1.ToString()+" "+con2.ToString()+" "+con3.ToString()+" "+con4.ToString()+" "+con5.ToString()+" "+con6.ToString()+" "+con7.ToString());
     }
 
     void PrepareCorrectAnswer() {
@@ -272,12 +276,12 @@ public class colourCodeModScript : MonoBehaviour {
         for(int i=0;i<answerOrder.Count;i++) {
             if(answerOrder[i]=="digit") {
                 finalText.Add(_dp==1?allTheDigits[0]:_dp==2?allTheDigits[1]:_dp==3?allTheDigits[2]:allTheDigits[3]);
-                _dp++;
                 if(i!=answerOrder.Count()) _logText+="d"+_dp.ToString()+", ";
+                _dp++;
             } else {
                 finalText.Add(_cp==1?allTheDigits[4]:_cp==2?allTheDigits[5]:allTheDigits[6]);
+                if(i!=answerOrder.Count()) _logText+="c"+_cp.ToString()+", ";
                 _cp++;
-                if(i!=answerOrder.Count()) _logText+="c"+_dp.ToString()+", ";
             }
         }
 
@@ -288,6 +292,8 @@ public class colourCodeModScript : MonoBehaviour {
             String c=finalText[i];
             answerText+=c=="orange"?"o":c=="blue"?"b":c=="red"?"r":c=="purple"?"p":c=="yellow"?"y":c=="green"?"g":c;
         }
+
+        doLog("Correct answer is: "+answerText);
     }
 
     void PressNumberedButton(int buttonId) {
@@ -306,10 +312,16 @@ public class colourCodeModScript : MonoBehaviour {
         }
         String[] myTextSplit=myTextSpliting.Split('.');
 
+        doLog(myTextSpliting);
+        doLog(ArrayCountAnArray(myTextSplit,"0.1.2.3.4.5.6.7.8.9".Split('.')).ToString());
+
+
         if(ArrayCountAnArray(myTextSplit,"0.1.2.3.4.5.6.7.8.9".Split('.'))==2) {
-            if(((BombInfo.GetTime()%60)%10).ToString()==buttonText) {
+            int TimerAsInteger=int.Parse(BombInfo.GetTime().ToString().Split('.')[0]);
+            if(((TimerAsInteger%60)%10).ToString()==buttonText) {
                 myText+=buttonText;
             } else {
+                doLog("Press this digit when the last digit of the seconds is equal to it");
                 BombModule.HandleStrike();
             }
         } else {
@@ -329,14 +341,16 @@ public class colourCodeModScript : MonoBehaviour {
             return;
         }
 
-        myText+=NumberedButtons[buttonId].gameObject.name.Replace("Button","");
+        myText+=ColouredButtons[buttonId].gameObject.name.Replace("Button","");
 
         PrepareRenderReadyText();
         RenderScreen();
     }
 
     void PressSubmitButton() {
-        if(myText==answerText) {
+        doLog("You entered: |"+myText+"|");
+        doLog("Correct answer: |"+answerText+"|");
+        if(String.Equals(myText,answerText)) {
             String myTextSpliting="";
             for(int i=0;i<myText.Length;i++) {
                 myTextSpliting+=myText[i]+".";
@@ -345,11 +359,13 @@ public class colourCodeModScript : MonoBehaviour {
             if(ArrayCount(myTextSplit,"0")==1&&ArrayCount(myTextSplit,"p")==1) {
                 var seconds=(BombInfo.GetTime()%60).ToString();
                 if(seconds=="40"||seconds=="04") {
+                    moduleSolved=true;
                     BombModule.HandlePass();
                 } else {
                     BombModule.HandleStrike();
                 }
             } else {
+                moduleSolved=true;
                 BombModule.HandlePass();
             }
         } else {
@@ -358,7 +374,11 @@ public class colourCodeModScript : MonoBehaviour {
     }
 
     void PressDeleteButton() {
-        myText=myText.Remove(myText.Length-1,1);
+        if(myText.Length>0) {
+            myText=myText.Remove(myText.Length-1,1);
+            PrepareRenderReadyText();
+            RenderScreen();
+        }
     }
 
 
@@ -366,7 +386,7 @@ public class colourCodeModScript : MonoBehaviour {
     int ArrayCount(String[] a,String b) {
         int o=0;
         for(int i=0;i<a.Length;i++) {
-            if(a[i]==b) {
+            if(String.Equals(a[i],b)) {
                 o++;
             }
         }
@@ -377,7 +397,7 @@ public class colourCodeModScript : MonoBehaviour {
         int o=0;
         for(int i=0;i<a.Length;i++) {
             for(int j=0;j<b.Length;j++) {
-                if(a[i]==b[i]) {
+                if(String.Equals(a[i],b[j])) {
                     o++;
                     break;
                 }
@@ -423,6 +443,9 @@ public class colourCodeModScript : MonoBehaviour {
     }
 
     void RenderScreen() {
+        for(int i=0;i<screenPieces.Length;i++) {
+            RenderBlock(i," ");
+        }
         if(moduleSolved) {
             screenText.Clear();
             screenText.Add("S");
@@ -444,13 +467,16 @@ public class colourCodeModScript : MonoBehaviour {
         for(int i=0;i<screenText.Count;i++) {
             if(screenText[i].GetType()==typeof(Material)) {
                 RenderBlock(i,(Material)screenText[i]);
-            } else {
+            } else if(screenText[i].GetType()==typeof(String)) {
                 RenderBlock(i,(String)screenText[i]);
+            } else {
+                RenderBlock(i," ");
             }
         }
     }
 
     void RenderBlock(int i, String m) {
+        if(i>=7) return;
         Transform pos=screenPieces[i].transform;
         pos.GetChild(0).gameObject.SetActive(true);
         pos.GetChild(1).gameObject.SetActive(false);
@@ -458,6 +484,7 @@ public class colourCodeModScript : MonoBehaviour {
     }
 
     void RenderBlock(int i, Material m) {
+        if(i>=7) return;
         Transform pos=screenPieces[i].transform;
         pos.GetChild(0).gameObject.SetActive(false);
         pos.GetChild(1).gameObject.SetActive(true);
