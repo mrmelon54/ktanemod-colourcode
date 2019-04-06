@@ -20,7 +20,7 @@ public class colourCodeModScript : MonoBehaviour {
     public GameObject[] screenPieces;
     public Material[] materials;
 
-    private object[] allTheDigits=new object[7];
+    private List<String> allTheDigits=new List<String>();
     private String myText="";
     private List<object> screenText=new List<object>();
     private String answerText;
@@ -60,14 +60,14 @@ public class colourCodeModScript : MonoBehaviour {
             };
         }
 
-        submitButton.OnInteract +=delegate(){
+        submitButton.OnInteract += delegate() {
             PressSubmitButton();
             return false;
-        }
-        deleteButton.OnInteract +=delegate(){
+        };
+        deleteButton.OnInteract += delegate() {
             PressDeleteButton();
             return false;
-        }
+        };
     }
 
     void Update() {
@@ -100,9 +100,9 @@ public class colourCodeModScript : MonoBehaviour {
             firstDigit=6;
         } else if(BombInfo.GetPortCount()>BombInfo.GetBatteryCount()) {
             firstDigit=7;
-        } else if(BombInfo.GetOnIndicators()>BombInfo.GetSolvedModuleNames().Count()) {
+        } else if(BombInfo.GetOnIndicators().Count()>BombInfo.GetSolvedModuleNames().Count()) {
             firstDigit=9;
-        } else if((BombInfo.GetOnIndicators()+BombInfo.GetOffIndicators()+BombInfo.GetPortCount())<getTotalModuleCountByName("Colour Code")) {
+        } else if((BombInfo.GetOnIndicators().Count()+BombInfo.GetOffIndicators().Count()+BombInfo.GetPortCount())<getTotalModuleCountByName("Colour Code")) {
             firstDigit=2;
         } else if(BombInfo.GetBatteryCount()<getTotalModuleCountByName("Planets")) {
             firstDigit=5;
@@ -123,13 +123,13 @@ public class colourCodeModScript : MonoBehaviour {
                 secondDigit=3;
             }
         } else if(backgroundColour=="orange") {
-            if(BombInfo.GetBatteryCount()>(BombInfo.GetIndicators()-BombInfo.GetPortCount())) {
+            if(BombInfo.GetBatteryCount()>(BombInfo.GetIndicators().Count()-BombInfo.GetPortCount())) {
                 secondDigit=9;
             } else {
                 secondDigit=4;
             }
         } else if(backgroundColour=="green") {
-            if(BombInfo.GetOnIndicators()>getTotalModuleCountByName("Planets")) {
+            if(BombInfo.GetOnIndicators().Count()>getTotalModuleCountByName("Planets")) {
                 secondDigit=8;
             } else {
                 secondDigit=1;
@@ -149,12 +149,12 @@ public class colourCodeModScript : MonoBehaviour {
 
         int thirdDigit=0;
         int bit1=(BombInfo.GetBatteryCount()+2)*BombInfo.GetSolvedModuleNames().Count();
-        int bit2=bit1-(BombInfo.GetOnIndicators()>BombInfo.GetOffIndicators()?15:0);
+        int bit2=bit1-(BombInfo.GetOnIndicators().Count()>BombInfo.GetOffIndicators().Count()?15:0);
         int bit3=bit2+(backgroundColour=="red"?150:0);
         int bit4=bit3/(bit3%3==0?3:1);
         int bit5=bit4%10;
         int bit6=bit5*(BombInfo.GetSerialNumber().First().Equals("0")?2:1);
-        int bit7=bit6*(BombInfo.GetSerialNumber().Second().Equals("0")?4:1);
+        int bit7=bit6*(BombInfo.GetSerialNumber()[1].Equals("0")?4:1);
         int bit8=bit7%10;
         thirdDigit=bit8;
         // only allow if the last seconds digit is the code digit
@@ -163,21 +163,21 @@ public class colourCodeModScript : MonoBehaviour {
 
         int fourthDigit=0;
         int bob1=100-(firstDigit+secondDigit+thirdDigit);
-        int bob2=bob1-(getTotalModuleCountByName("Colour Code")+(BombInfo.GetSolvableModuleNames().Count()-BombInfo.GetSolvedModuleNames().Count());
-        int bob3=bob2+BombInfo.GetOffIndicators();
+        int bob2=bob1-(getTotalModuleCountByName("Colour Code")+(BombInfo.GetSolvableModuleNames().Count()-BombInfo.GetSolvedModuleNames().Count()));
+        int bob3=bob2+BombInfo.GetOffIndicators().Count();
         int bob4=bob3%10;
         fourthDigit=bob4;
 
 
 
         String firstColour="purple"; // default to purple
-        if(backgroundColour=="red" && BombInfo.GetPortCount()==0 && BombInfo.GetIndicators()==0 && BombInfo.GetSolvedModuleNames().Count()==0) {
+        if(backgroundColour=="red" && BombInfo.GetPortCount()==0 && BombInfo.GetIndicators().Count()==0 && BombInfo.GetSolvedModuleNames().Count()==0) {
             firstColour="red";
-        } else if(backgroundColour=="orange" && BombInfo.GetSerialNumberDigits().Sum()%10==BombInfo.GetBatteryCount()) {
+        } else if(backgroundColour=="orange" && BombInfo.GetSerialNumberNumbers().Sum()%10==BombInfo.GetBatteryCount()) {
             firstColour="orange";
-        } else if(backgroundColour=="green" && BombInfo.GetPortCount()>BombInfo.GetOffIndicators()) {
+        } else if(backgroundColour=="green" && BombInfo.GetPortCount()>BombInfo.GetOffIndicators().Count()) {
             firstColour="green";
-        } else if(backgroundColour=="yellow" && BombInfo.GetOffIndicators()==1 && BombInfo.GetSerialNumberDigits().Last()%2==1) {
+        } else if(backgroundColour=="yellow" && BombInfo.GetOffIndicators().Count()==1 && BombInfo.GetSerialNumberNumbers().Last()%2==1) {
             firstColour="yellow";
         } else if(backgroundColour=="blue" && BombInfo.GetBatteryCount()==BombInfo.GetSolvedModuleNames().Count()) {
             firstColour="blue";
@@ -186,11 +186,11 @@ public class colourCodeModScript : MonoBehaviour {
 
 
         String secondColour="purple"; // default to purple
-        if(BombInfo.GetSerialNumberDigits().Last()%2==0) {
+        if(BombInfo.GetSerialNumberNumbers().Last()%2==0) {
             secondColour="blue";
         } else if(BombInfo.GetPortCount(Port.Parallel)>0) {
             secondColour="green";
-        } else if((BombInfo.GetBatteryCount()+BombInfo.GetSerialNumberDigits().Sum())<=5) {
+        } else if((BombInfo.GetBatteryCount()+BombInfo.GetSerialNumberNumbers().Sum())<=5) {
             secondColour="orange";
         } else if(BombInfo.GetBatteryCount(Battery.AA)==BombInfo.GetBatteryCount()) {
             secondColour="red";
@@ -214,17 +214,32 @@ public class colourCodeModScript : MonoBehaviour {
 
 
 
-        allTheDigits={firstDigit,secondDigit,thirdDigit,fourthDigit,firstColour,secondColour,thirdColour};
+        allTheDigits.Clear();
+        allTheDigits.Add(firstDigit.ToString());
+        allTheDigits.Add(secondDigit.ToString());
+        allTheDigits.Add(thirdDigit.ToString());
+        allTheDigits.Add(fourthDigit.ToString());
+        allTheDigits.Add(firstColour);
+        allTheDigits.Add(secondColour);
+        allTheDigits.Add(thirdColour);
+        doLog("Digit 1 = "+firstDigit.toString());
+        doLog("Digit 2 = "+secondDigit.toString());
+        doLog("Digit 3 = "+thirdDigit.toString());
+        doLog("Digit 4 = "+fourthDigit.toString());
+        doLog("Colour 1 = "+firstColour);
+        doLog("Colour 2 = "+secondColour);
+        doLog("Colour 3 = "+thirdColour);
     }
 
     void CalculateDigitOrder() {
+        int productOfDigits=(int.Parse(allTheDigits[0])*int.Parse(allTheDigits[1])*int.Parse(allTheDigits[2])*int.Parse(allTheDigits[3]));
         bool con1=BombInfo.GetBatteryCount()>12;
-        bool con2=(firstDigit*secondDigit*thirdDigit*fourthDigit)>BombInfo.GetModuleNames().Count();
+        bool con2=productOfDigits>BombInfo.GetModuleNames().Count();
         bool con3=BombInfo.GetModuleNames().Count()==1;
         bool con4=DateTime.Now.Hour>=3&&DateTime.Now.Hour<4;
         bool con5=BombInfo.GetModuleNames().Count()==101;
-        bool con6=getTotalModuleCountByName("Colour Code")>Math.Sqrt(BombInfo.GetModuleNames());
-        bool con7=BombInfo.GetSerialNumberLetters().Count();
+        bool con6=getTotalModuleCountByName("Colour Code")>Math.Sqrt(BombInfo.GetModuleNames().Count());
+        bool con7=BombInfo.GetSerialNumberLetters().Count()==3;
 
         answerOrder.Clear();
         if(con1) answerOrder.Add("digit");
@@ -242,6 +257,8 @@ public class colourCodeModScript : MonoBehaviour {
         if(!con3) answerOrder.Add("digit");
         if(!con2) answerOrder.Add("colour");
         if(!con1) answerOrder.Add("digit");
+
+        doLog("Order of digits conditions = "+con1.toString()+" "+con2.toString()+" "+con3.toString()+" "+con4.toString()+" "+con5.toString()+" "+con6.toString()+" "+con7.toString()+" ");
     }
 
     void PrepareCorrectAnswer() {
@@ -250,15 +267,21 @@ public class colourCodeModScript : MonoBehaviour {
         int _dp=1;
         int _cp=1;
 
-        for(int i=0;i<answerOrder.Length;i++) {
+        String _logText="Order of digits = ";
+
+        for(int i=0;i<answerOrder.Count;i++) {
             if(answerOrder[i]=="digit") {
-                finalText.Add(_dp==1?firstDigit:_dp==2?secondDigit:_dp==3?thirdDigit:fourthDigit);
+                finalText.Add(_dp==1?allTheDigits[0]:_dp==2?allTheDigits[1]:_dp==3?allTheDigits[2]:allTheDigits[3]);
                 _dp++;
-            } eles {
-                finalText.Add(_cp==1?firstColour:_cp==2?secondColour:thirdColour);
+                if(i!=answerOrder.Count()) _logText+="d"+_dp.ToString()+", ";
+            } else {
+                finalText.Add(_cp==1?allTheDigits[4]:_cp==2?allTheDigits[5]:allTheDigits[6]);
                 _cp++;
+                if(i!=answerOrder.Count()) _logText+="c"+_dp.ToString()+", ";
             }
         }
+
+        doLog(_logText);
 
         answerText="";
         for(int i=0;i<finalText.Count;i++) {
@@ -275,10 +298,16 @@ public class colourCodeModScript : MonoBehaviour {
             return;
         }
 
-        String buttonText=NumberedButtons[buttonId].Name.Replace("Button","");
+        String buttonText=NumberedButtons[buttonId].gameObject.name.Replace("Button","");
 
-        if(ArrayCountAnArray(myText.Split(""),"0123456789".Split(""))==2) {
-            if(BombInfo.GetTimer().Last()==(char) buttonText) {
+        String myTextSpliting="";
+        for(int i=0;i<myText.Length;i++) {
+            myTextSpliting+=myText[i]+".";
+        }
+        String[] myTextSplit=myTextSpliting.Split('.');
+
+        if(ArrayCountAnArray(myTextSplit,"0.1.2.3.4.5.6.7.8.9".Split('.'))==2) {
+            if(((BombInfo.GetTime()%60)%10).ToString()==buttonText) {
                 myText+=buttonText;
             } else {
                 BombModule.HandleStrike();
@@ -300,17 +329,21 @@ public class colourCodeModScript : MonoBehaviour {
             return;
         }
 
-        myText+=NumberedButtons[buttonId].Name.Replace("Button","");
+        myText+=NumberedButtons[buttonId].gameObject.name.Replace("Button","");
 
         PrepareRenderReadyText();
         RenderScreen();
     }
 
-
     void PressSubmitButton() {
         if(myText==answerText) {
-            if(ArrayCount(myText.Split(""),"0")==1&&ArrayCount(myText.Split(""),"p")==1) {
-                var seconds=BombInfo.GetSerialNumber().Reverse().Take(2).ToString();
+            String myTextSpliting="";
+            for(int i=0;i<myText.Length;i++) {
+                myTextSpliting+=myText[i]+".";
+            }
+            String[] myTextSplit=myTextSpliting.Split('.');
+            if(ArrayCount(myTextSplit,"0")==1&&ArrayCount(myTextSplit,"p")==1) {
+                var seconds=(BombInfo.GetTime()%60).ToString();
                 if(seconds=="40"||seconds=="04") {
                     BombModule.HandlePass();
                 } else {
@@ -353,64 +386,82 @@ public class colourCodeModScript : MonoBehaviour {
         return o;
     }
 
-    static string Reverse(this string text) {
-        return Array.Reverse(text.Select(x => x).ToArray()).Join("");
-    }
-
     void PrepareRenderReadyText() {
         myText=myText.ToLower();
-        String[] mySplit=myText.Split("");
+        String myTextSpliting="";
+        for(int i=0;i<myText.Length;i++) {
+            myTextSpliting+=myText[i]+".";
+        }
+        String[] myTextSplit=myTextSpliting.Split('.');
         screenText.Clear();
-        for(int i=0;i<mySplit.Length;i++) {
-            String c=mySplit[i];
-            swtich(c) {
-                case "o":
+        for(int i=0;i<myTextSplit.Length;i++) {
+            String c=myTextSplit[i];
+            switch(c) {
+                case "r":
                     screenText.Add(materials[0]);
                     break;
-                case "b":
+                case "o":
                     screenText.Add(materials[1]);
                     break;
-                case "r":
+                case "y":
                     screenText.Add(materials[2]);
                     break;
-                case "p":
+                case "g":
                     screenText.Add(materials[3]);
                     break;
-                case "y":
+                case "b":
                     screenText.Add(materials[4]);
                     break;
-                case "g":
+                case "p":
                     screenText.Add(materials[5]);
                     break;
                 default:
                     screenText.Add(c);
+                    break;
             }
         }
     }
 
     void RenderScreen() {
         if(moduleSolved) {
-            screenText={"S","o","l","v","e","d"};
+            screenText.Clear();
+            screenText.Add("S");
+            screenText.Add("o");
+            screenText.Add("l");
+            screenText.Add("v");
+            screenText.Add("e");
+            screenText.Add("d");
         } else if(myText.Length==0) {
-            screenText={"H","e","l","p"," ","M","e"};
+            screenText.Clear();
+            screenText.Add("H");
+            screenText.Add("e");
+            screenText.Add("l");
+            screenText.Add("p");
+            screenText.Add(" ");
+            screenText.Add("M");
+            screenText.Add("e");
         }
-        for(int i=0;i<screenText.Length;i++) {
-            RenderBlock(i,screenText[i]);
+        for(int i=0;i<screenText.Count;i++) {
+            if(screenText[i].GetType()==typeof(Material)) {
+                RenderBlock(i,(Material)screenText[i]);
+            } else {
+                RenderBlock(i,(String)screenText[i]);
+            }
         }
     }
 
     void RenderBlock(int i, String m) {
-        GameObject pos=screenPieces.GetChild(i);
-        pos.GetChild(0).SetActive(true);
-        pos.GetChild(1).SetActive(false);
-        pos.GetChild(0).GetComponent<Text Mesh>().text=m;
+        Transform pos=screenPieces[i].transform;
+        pos.GetChild(0).gameObject.SetActive(true);
+        pos.GetChild(1).gameObject.SetActive(false);
+        pos.GetChild(0).gameObject.GetComponent<TextMesh>().text=m;
     }
 
     void RenderBlock(int i, Material m) {
-        GameObject pos=screenPieces.GetChild(i);
-        pos.GetChild(0).SetActive(false);
-        pos.GetChild(1).SetActive(true);
-        pos.GetChild(1).GetComponent<Renderer>().material=m;
+        Transform pos=screenPieces[i].transform;
+        pos.GetChild(0).gameObject.SetActive(false);
+        pos.GetChild(1).gameObject.SetActive(true);
+        pos.GetChild(1).gameObject.GetComponent<Renderer>().material=m;
     }
 
 
@@ -422,7 +473,7 @@ public class colourCodeModScript : MonoBehaviour {
     // Pls update this for this module
     // Make sure to add the press at a specific time bit
 
-#pragma warning disable 414
+/*#pragma warning disable 414
     private readonly string TwitchHelpMessage = @"Submit your answer with “!{0} press 1234 delete space”.";
 #pragma warning restore 414
 
@@ -452,5 +503,5 @@ public class colourCodeModScript : MonoBehaviour {
         }
 
         return null;
-    }
+    }*/
 }
