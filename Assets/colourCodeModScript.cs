@@ -312,10 +312,6 @@ public class colourCodeModScript : MonoBehaviour {
         }
         String[] myTextSplit=myTextSpliting.Split('.');
 
-        doLog(myTextSpliting);
-        doLog(ArrayCountAnArray(myTextSplit,"0.1.2.3.4.5.6.7.8.9".Split('.')).ToString());
-
-
         if(ArrayCountAnArray(myTextSplit,"0.1.2.3.4.5.6.7.8.9".Split('.'))==2) {
             int TimerAsInteger=int.Parse(BombInfo.GetTime().ToString().Split('.')[0]);
             if(((TimerAsInteger%60)%10).ToString()==buttonText) {
