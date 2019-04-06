@@ -18,6 +18,7 @@ public class colourCodeModScript : MonoBehaviour {
     public KMSelectable deleteButton;
     public KMSelectable ModuleSelect;
     public GameObject[] screenPieces;
+    public GameObject moduleBackground;
     public Material[] materials;
 
     private List<String> allTheDigits=new List<String>();
@@ -37,6 +38,11 @@ public class colourCodeModScript : MonoBehaviour {
 
     void Start() {
         moduleId = moduleIdCounter++;
+
+        String[] backgroundTranslationTable={"red","orange","yellow","green","blue","purple"};
+        int newBackground=Random.Range(0, materials.Length - 1);
+        backgroundColour=backgroundTranslationTable[newBackground];
+        moduleBackground.GetComponent<Renderer>().material=materials[newBackground];
 
         CalculateCorrectAnswer();
         CalculateDigitOrder();
