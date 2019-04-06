@@ -18,8 +18,14 @@ public class colourCodeModScript : MonoBehaviour {
     public KMSelectable deleteButton;
     public KMSelectable ModuleSelect;
     public GameObject[] screenPieces;
+    public Material[] materials;
 
-    private String[] answerText;
+    private object[] allTheDigits=new object[7];
+    private String myText="";
+    private List<object> screenText=new List<object>();
+    private String answerText;
+    private List<String> finalText;
+    private List<String> answerOrder;
     private String backgroundColour;
 
     int solvedModules;
@@ -66,12 +72,9 @@ public class colourCodeModScript : MonoBehaviour {
 
     void Update() {
         if (!moduleSolved) {
-            var newSolvedModules = BombInfo.GetSolvedModuleNames().Count;
-
-            if (newSolvedModules != solvedModules) {
-                solvedModules = newSolvedModules;
-                CalculateCorrectAnswer();
-            }
+            CalculateCorrectAnswer();
+            CalculateDigitOrder();
+            PrepareCorrectAnswer();
         }
     }
 
@@ -207,9 +210,64 @@ public class colourCodeModScript : MonoBehaviour {
         int bar7=bar6*BombInfo.GetBatteryCount();
         int bar8=bar7%6; // I removed the +1 so 0=orange instead of 1=orange
         String[] colourNumberConvertor={"orange","blue","red","purple","yellow","green"};
+        thirdColour=colourNumberConvertor[bar8];
+
+
+
+        allTheDigits={firstDigit,secondDigit,thirdDigit,fourthDigit,firstColour,secondColour,thirdColour};
     }
 
-    void PressButton(int buttonId) {
+    void CalculateDigitOrder() {
+        bool con1=BombInfo.GetBatteryCount()>12;
+        bool con2=(firstDigit*secondDigit*thirdDigit*fourthDigit)>BombInfo.GetModuleNames().Count();
+        bool con3=BombInfo.GetModuleNames().Count()==1;
+        bool con4=DateTime.Now.Hour>=3&&DateTime.Now.Hour<4;
+        bool con5=BombInfo.GetModuleNames().Count()==101;
+        bool con6=getTotalModuleCountByName("Colour Code")>Math.Sqrt(BombInfo.GetModuleNames());
+        bool con7=BombInfo.GetSerialNumberLetters().Count();
+
+        answerOrder.Clear();
+        if(con1) answerOrder.Add("digit");
+        if(con2) answerOrder.Add("colour");
+        if(con3) answerOrder.Add("digit");
+        if(con4) answerOrder.Add("colour");
+        if(con5) answerOrder.Add("digit");
+        if(con6) answerOrder.Add("colour");
+        if(con7) answerOrder.Add("digit");
+
+        if(!con7) answerOrder.Add("digit");
+        if(!con6) answerOrder.Add("colour");
+        if(!con5) answerOrder.Add("digit");
+        if(!con4) answerOrder.Add("colour");
+        if(!con3) answerOrder.Add("digit");
+        if(!con2) answerOrder.Add("colour");
+        if(!con1) answerOrder.Add("digit");
+    }
+
+    void PrepareCorrectAnswer() {
+        finalText.Clear();
+
+        int _dp=1;
+        int _cp=1;
+
+        for(int i=0;i<answerOrder.Length;i++) {
+            if(answerOrder[i]=="digit") {
+                finalText.Add(_dp==1?firstDigit:_dp==2?secondDigit:_dp==3?thirdDigit:fourthDigit);
+                _dp++;
+            } eles {
+                finalText.Add(_cp==1?firstColour:_cp==2?secondColour:thirdColour);
+                _cp++;
+            }
+        }
+
+        answerText="";
+        for(int i=0;i<finalText.Count;i++) {
+            String c=finalText[i];
+            answerText+=c=="orange"?"o":c=="blue"?"b":c=="red"?"r":c=="purple"?"p":c=="yellow"?"y":c=="green"?"g":c;
+        }
+    }
+
+    void PressNumberedButton(int buttonId) {
         BombAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         ModuleSelect.AddInteractionPunch();
 
@@ -217,58 +275,152 @@ public class colourCodeModScript : MonoBehaviour {
             return;
         }
 
-        
+        String buttonText=NumberedButtons[buttonId].Name.Replace("Button","");
 
-        if (buttonId == 11) {
-            myText = myText.PadLeft(6, '0');
-
-            if (!myText.Equals("") && answerText == myText) {
-                moduleSolved = true;
-                myText = "Solved";
-                RenderScreen();
-                doLog("Module solved.");
-                BombModule.HandlePass();
-                StartCoroutine(EndAnimation());
+        if(ArrayCountAnArray(myText.Split(""),"0123456789".Split(""))==2) {
+            if(BombInfo.GetTimer().Last()==(char) buttonText) {
+                myText+=buttonText;
             } else {
-                doLog("Strike! The PIN "+myText+" is incorrect.");
-                myText = "";
                 BombModule.HandleStrike();
             }
-        } else if (buttonId == 10) {
-            if (myText.Length > 0) {
-                myText = myText.Remove(myText.Length - 1);
-            }
         } else {
-            myText += buttonId;
+            myText+=buttonText;
         }
 
+
+        PrepareRenderReadyText();
         RenderScreen();
     }
 
-    void RenderScreen() {
-        if (myText.Length > 6 && myText != "Help Me" && myText != "Solved") {
-            myText = myText.Remove(myText.Length - 1);
+    void PressColouredButton(int buttonId) {
+        BombAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        ModuleSelect.AddInteractionPunch();
+
+        if (moduleSolved) {
+            return;
         }
 
-        screenText.text = myText;
+        myText+=NumberedButtons[buttonId].Name.Replace("Button","");
 
-        if (myText.Length == 0) {
-            screenText.text = "Help Me";
+        PrepareRenderReadyText();
+        RenderScreen();
+    }
+
+
+    void PressSubmitButton() {
+        if(myText==answerText) {
+            if(ArrayCount(myText.Split(""),"0")==1&&ArrayCount(myText.Split(""),"p")==1) {
+                var seconds=BombInfo.GetSerialNumber().Reverse().Take(2).ToString();
+                if(seconds=="40"||seconds=="04") {
+                    BombModule.HandlePass();
+                } else {
+                    BombModule.HandleStrike();
+                }
+            } else {
+                BombModule.HandlePass();
+            }
+        } else {
+            BombModule.HandleStrike();
         }
     }
 
-    IEnumerator EndAnimation() {
-        for (int i = 0; i < 100; i++) {
-            planetModels[planetShown].transform.Translate(0.0f, -0.0005f, 0.0f);
-            yield return null;
+    void PressDeleteButton() {
+        myText=myText.Remove(myText.Length-1,1);
+    }
+
+
+
+    int ArrayCount(String[] a,String b) {
+        int o=0;
+        for(int i=0;i<a.Length;i++) {
+            if(a[i]==b) {
+                o++;
+            }
         }
-        for (int i=0;i<stripLights.Length;i++) {
-            for (int j = 0; j < stripLights[i].transform.childCount; j++) {
-                stripLights[i].transform.GetChild(j).gameObject.SetActive((stripLights[i].transform.childCount-1 == j));
-                yield return null;
+        return o;
+    }
+
+    int ArrayCountAnArray(String[] a,String[] b) {
+        int o=0;
+        for(int i=0;i<a.Length;i++) {
+            for(int j=0;j<b.Length;j++) {
+                if(a[i]==b[i]) {
+                    o++;
+                    break;
+                }
+            }
+        }
+        return o;
+    }
+
+    static string Reverse(this string text) {
+        return Array.Reverse(text.Select(x => x).ToArray()).Join("");
+    }
+
+    void PrepareRenderReadyText() {
+        myText=myText.ToLower();
+        String[] mySplit=myText.Split("");
+        screenText.Clear();
+        for(int i=0;i<mySplit.Length;i++) {
+            String c=mySplit[i];
+            swtich(c) {
+                case "o":
+                    screenText.Add(materials[0]);
+                    break;
+                case "b":
+                    screenText.Add(materials[1]);
+                    break;
+                case "r":
+                    screenText.Add(materials[2]);
+                    break;
+                case "p":
+                    screenText.Add(materials[3]);
+                    break;
+                case "y":
+                    screenText.Add(materials[4]);
+                    break;
+                case "g":
+                    screenText.Add(materials[5]);
+                    break;
+                default:
+                    screenText.Add(c);
             }
         }
     }
+
+    void RenderScreen() {
+        if(moduleSolved) {
+            screenText={"S","o","l","v","e","d"};
+        } else if(myText.Length==0) {
+            screenText={"H","e","l","p"," ","M","e"};
+        }
+        for(int i=0;i<screenText.Length;i++) {
+            RenderBlock(i,screenText[i]);
+        }
+    }
+
+    void RenderBlock(int i, String m) {
+        GameObject pos=screenPieces.GetChild(i);
+        pos.GetChild(0).SetActive(true);
+        pos.GetChild(1).SetActive(false);
+        pos.GetChild(0).GetComponent<Text Mesh>().text=m;
+    }
+
+    void RenderBlock(int i, Material m) {
+        GameObject pos=screenPieces.GetChild(i);
+        pos.GetChild(0).SetActive(false);
+        pos.GetChild(1).SetActive(true);
+        pos.GetChild(1).GetComponent<Renderer>().material=m;
+    }
+
+
+
+
+
+
+    // For KingSlendy :)
+    // Pls update this for this module
+    // Make sure to add the press at a specific time bit
 
 #pragma warning disable 414
     private readonly string TwitchHelpMessage = @"Submit your answer with “!{0} press 1234 delete space”.";
