@@ -243,12 +243,12 @@ public class colourCodeModScript : MonoBehaviour {
 
     void CalculateDigitOrder() {
         int productOfDigits=(int.Parse(allTheDigits[0])*int.Parse(allTheDigits[1])*int.Parse(allTheDigits[2])*int.Parse(allTheDigits[3]));
-        bool con1=BombInfo.GetBatteryCount()>12;
-        bool con2=productOfDigits>BombInfo.GetModuleNames().Count();
-        bool con3=BombInfo.GetModuleNames().Count()==1;
-        bool con4=DateTime.Now.Hour>=3&&DateTime.Now.Hour<4;
-        bool con5=BombInfo.GetModuleNames().Count()==101;
-        bool con6=getTotalModuleCountByName("Colour Code")>Math.Sqrt(BombInfo.GetModuleNames().Count());
+        bool con1=BombInfo.GetBatteryCount()>DateTime.Now.Month;
+        bool con2=productOfDigits>(BombInfo.GetModuleNames().Count()%10);
+        bool con3=getTotalModuleCountByName("Colour Code")==1;
+        bool con4=DateTime.Now.Hour>=3&&DateTime.Now.Minute>=00&&DateTime.Now.Hour<16&&DateTime<60;
+        bool con5=BombInfo.GetModuleNames().Count()==101||BombInfo.GetModuleNames().Count()==81;
+        bool con6=getTotalModuleCountByName("Colour Code")>Math.Sqrt(BombInfo.GetModuleNames().Count()/2);
         bool con7=BombInfo.GetSerialNumberLetters().Count()==3;
 
         answerOrder.Clear();
