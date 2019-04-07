@@ -243,10 +243,11 @@ public class colourCodeModScript : MonoBehaviour {
 
     void CalculateDigitOrder() {
         int productOfDigits=(int.Parse(allTheDigits[0])*int.Parse(allTheDigits[1])*int.Parse(allTheDigits[2])*int.Parse(allTheDigits[3]));
+        int timeNum=DateTime.Now.Hour*100+DateTime.Now.Minute;
         bool con1=BombInfo.GetBatteryCount()>DateTime.Now.Month;
         bool con2=productOfDigits>(BombInfo.GetModuleNames().Count()%10);
         bool con3=getTotalModuleCountByName("Colour Code")==1;
-        bool con4=DateTime.Now.Hour>=3&&DateTime.Now.Minute>=00&&DateTime.Now.Hour<16&&DateTime<60;
+        bool con4=timeNum>=300&&timeNum<1600;
         bool con5=BombInfo.GetModuleNames().Count()==101||BombInfo.GetModuleNames().Count()==81;
         bool con6=getTotalModuleCountByName("Colour Code")>Math.Sqrt(BombInfo.GetModuleNames().Count()/2);
         bool con7=BombInfo.GetSerialNumberLetters().Count()==3;
@@ -359,16 +360,22 @@ public class colourCodeModScript : MonoBehaviour {
             }
             String[] myTextSplit=myTextSpliting.Split('.');
             if(ArrayCount(myTextSplit,"0")==1&&ArrayCount(myTextSplit,"p")==1) {
-                var seconds=(BombInfo.GetTime()%60).ToString();
-                if(seconds=="40"||seconds=="04") {
+                doLog("1 purple and 1 zero so submit can only be pressed on 40 or 04");
+                int seconds=int.Parse((BombInfo.GetTime()%60).ToString().Split('.')[0]);
+                doLog("Current seconds figures are: "+seconds);
+                if(seconds==40||seconds==4) {
+                    doLog("This is correct");
                     moduleSolved=true;
                     BombModule.HandlePass();
+                    RenderScreen();
                 } else {
+                    doLog("Invalid it must say 40 or 04");
                     BombModule.HandleStrike();
                 }
             } else {
                 moduleSolved=true;
                 BombModule.HandlePass();
+                RenderScreen();
             }
         } else {
             BombModule.HandleStrike();
