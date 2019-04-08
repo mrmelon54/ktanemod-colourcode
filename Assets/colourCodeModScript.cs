@@ -500,44 +500,58 @@ public class colourCodeModScript : MonoBehaviour {
         pos.GetChild(1).gameObject.GetComponent<Renderer>().material=m;
     }
 
-
-
-
-
-
-    // For KingSlendy :)
-    // Pls update this for this module
-    // Make sure to add the press at a specific time bit
-
-/*#pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"Submit your answer with “!{0} press 1234 delete space”.";
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"Submit your answer with “!{0} press 1|R|Y|9|P|0s5|3|GOs4 (add sX [where 'X' is a digit] to press the button when the last seconds digit of the bomb is 'X')”. Delete screen with “!{0} delete 5 (number of times to press the button)”. Submit answer with “!{0} go 4 (submit when the last seconds digit of the bomb is the number)”.";
 #pragma warning restore 414
 
-    KMSelectable[] ProcessTwitchCommand(string command) {
+    IEnumerator ProcessTwitchCommand(string command) {
         command = command.ToLowerInvariant().Trim();
 
-        if (Regex.IsMatch(command, @"^press +[0-9a-z^, |&]+$")) {
+        if (Regex.IsMatch(command, @"^press +[0-9roygbps|]+$")) {
             command = command.Substring(6).Trim();
-            var presses = command.Split(new[] { ',', ' ', '|', '&' }, StringSplitOptions.RemoveEmptyEntries);
-            var pressList = new List<KMSelectable>();
+            var presses = command.Split('|');
 
-            for (int i = 0; i < presses.Length; i++) {
-                if (Regex.IsMatch(presses[i], @"^(delete|space)$")) {
-                    pressList.Add(ModuleButtons[(presses[i].Equals("delete")) ? 10 : 11]);
-                } else {
-                    string numpadPresses = presses[i];
+            for (var i = 0; i < presses.Length; i++) {
+                KMSelectable pressButton;
 
-                    for (int j = 0; j < numpadPresses.Length; j++) {
-                        if (Regex.IsMatch(numpadPresses[j].ToString(), @"^[0-9]$")) {
-                            pressList.Add(ModuleButtons[int.Parse(numpadPresses[j].ToString())]);
+                if (Regex.IsMatch(presses[i], @"^[0-9]$") || Regex.IsMatch(presses[i], @"^[0-9][s][0-9]$")) {
+                    pressButton = NumberedButtons[int.Parse(presses[i].First().ToString())];
+
+                    if (Regex.IsMatch(presses[i], @"^[0-9][s][0-9]$")) {
+                        while (int.Parse(BombInfo.GetFormattedTime().Last().ToString()) != int.Parse(presses[i].Last().ToString())) {
+                            yield return new WaitForSeconds(0.1f);
                         }
                     }
+                } else if (Regex.IsMatch(presses[i], @"^[r|o|y|g|b|p]$")) {
+                    var colorLetters = new[] { "r", "o", "y", "g", "b", "p" };
+                    pressButton = ColouredButtons[Array.IndexOf(colorLetters, presses[i])];
+                } else {
+                    continue;
                 }
-            }
 
-            return (pressList.Count > 0) ? pressList.ToArray() : null;
+                yield return pressButton;
+                yield return new WaitForSeconds(0.1f);
+                yield return pressButton;
+            }
         }
 
-        return null;
-    }*/
+        if (Regex.IsMatch(command, @"^delete [1-7]$")) {
+            for (var i = 0; i < int.Parse(command.Substring(7).Trim()); i++) {
+                yield return deleteButton;
+                yield return new WaitForSeconds(0.1f);
+                yield return deleteButton;
+            }
+        }
+
+        if (Regex.IsMatch(command, @"^go [0-4]$")) {
+            while (int.Parse(BombInfo.GetFormattedTime().Last().ToString()) != int.Parse(command.Substring(3).Trim()))
+                    yield return new WaitForSeconds(0.1f);
+
+            yield return submitButton;
+            yield return new WaitForSeconds(0.1f);
+            yield return submitButton;
+        }
+
+        yield break;
+    }
 }
