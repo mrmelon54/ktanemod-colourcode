@@ -20,6 +20,7 @@ public class colourCodeModScript : MonoBehaviour {
     public GameObject[] screenPieces;
     public GameObject moduleBackground;
     public Material[] materials;
+    public Material[] materialsLight;
 
     private List<String> allTheDigits=new List<String>();
     private String myText="";
@@ -85,6 +86,7 @@ public class colourCodeModScript : MonoBehaviour {
             CalculateCorrectAnswer();
             CalculateDigitOrder();
             PrepareCorrectAnswer();
+            LastModulesSolved=BombInfo.GetSolvedModuleNames().Count();
         }
     }
 
@@ -163,8 +165,8 @@ public class colourCodeModScript : MonoBehaviour {
         int bit3=bit2+(backgroundColour=="red"?150:0);
         int bit4=bit3/(bit3%3==0?3:1);
         int bit5=bit4%10;
-        int bit6=bit5*(BombInfo.GetSerialNumber().First().Equals("0")?2:1);
-        int bit7=bit6*(BombInfo.GetSerialNumber()[1].Equals("0")?4:1);
+        int bit6=bit5*(firstDigit==0?2:1);
+        int bit7=bit6*(secondDigit==0?4:1);
         int bit8=bit7%10;
         thirdDigit=Math.Abs(bit8);
         // only allow if the last seconds digit is the code digit
@@ -242,7 +244,15 @@ public class colourCodeModScript : MonoBehaviour {
     }
 
     void CalculateDigitOrder() {
-        int productOfDigits=(int.Parse(allTheDigits[0])*int.Parse(allTheDigits[1])*int.Parse(allTheDigits[2])*int.Parse(allTheDigits[3]));
+        List<String> productDigits=new List<String>();
+        for(int i=0;i<4;i++) {
+            if(int.Parse(allTheDigits[i])==0) {
+                productDigits.Add((1).ToString());
+            } else {
+                productDigits.Add(allTheDigits[i]);
+            }
+        }
+        int productOfDigits=(int.Parse(productDigits[0])*int.Parse(productDigits[1])*int.Parse(productDigits[2])*int.Parse(productDigits[3]));
         int timeNum=DateTime.Now.Hour*100+DateTime.Now.Minute;
         bool con1=BombInfo.GetBatteryCount()>DateTime.Now.Month;
         bool con2=productOfDigits>(BombInfo.GetModuleNames().Count()%10);
@@ -331,6 +341,9 @@ public class colourCodeModScript : MonoBehaviour {
             myText+=buttonText;
         }
 
+        if(myText.Length>7) {
+            myText=myText.Remove(myText.Length-1,1);
+        }
 
         PrepareRenderReadyText();
         RenderScreen();
@@ -345,6 +358,10 @@ public class colourCodeModScript : MonoBehaviour {
         }
 
         myText+=ColouredButtons[buttonId].gameObject.name.Replace("Button","");
+
+        if(myText.Length>7) {
+            myText=myText.Remove(myText.Length-1,1);
+        }
 
         PrepareRenderReadyText();
         RenderScreen();
@@ -427,22 +444,22 @@ public class colourCodeModScript : MonoBehaviour {
             String c=myTextSplit[i];
             switch(c) {
                 case "r":
-                    screenText.Add(materials[0]);
+                    screenText.Add(materialsLight[0]);
                     break;
                 case "o":
-                    screenText.Add(materials[1]);
+                    screenText.Add(materialsLight[1]);
                     break;
                 case "y":
-                    screenText.Add(materials[2]);
+                    screenText.Add(materialsLight[2]);
                     break;
                 case "g":
-                    screenText.Add(materials[3]);
+                    screenText.Add(materialsLight[3]);
                     break;
                 case "b":
-                    screenText.Add(materials[4]);
+                    screenText.Add(materialsLight[4]);
                     break;
                 case "p":
-                    screenText.Add(materials[5]);
+                    screenText.Add(materialsLight[5]);
                     break;
                 default:
                     screenText.Add(c);

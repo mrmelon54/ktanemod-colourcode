@@ -7,3 +7,8 @@ Version 2.0
 
 Version 2.1
   - Fixed the 1 purple & 1 zero rule so the module can do solved
+
+Version 3.0
+  - Added Twitch Plays
+  - Rewrote some of the manual to prevent getting as many zeros
+  - Changed the order conditions for the product of code digits so zero is not included
