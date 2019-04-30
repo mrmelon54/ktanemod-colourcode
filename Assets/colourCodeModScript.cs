@@ -518,7 +518,7 @@ public class colourCodeModScript : MonoBehaviour {
     }
 
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"Submit your answer with “!{0} press 1|R|Y|9|P|0s5|3|GOs4 (add sX [where 'X' is a digit] to press the button when the last seconds digit of the bomb is 'X')”. Delete screen with “!{0} delete 5 (number of times to press the button)”. Submit answer with “!{0} go 4 (submit when the last seconds digit of the bomb is the number)”.";
+    private readonly string TwitchHelpMessage = @"Submit your answer with “!{0} press 1|R|Y|9|P|0s0|3 (add sX [where 'X' is a digit] to press the button when the last seconds digit of the bomb is 'X')”. Delete screen with “!{0} delete 5 (number of times to press the button)”. Submit answer with “!{0} go 40 (submit when the seconds of the bomb is the number)”.";
 #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command) {
@@ -535,9 +535,16 @@ public class colourCodeModScript : MonoBehaviour {
                     pressButton = NumberedButtons[int.Parse(presses[i].First().ToString())];
 
                     if (Regex.IsMatch(presses[i], @"^[0-9][s][0-9]$")) {
-                        while (int.Parse(BombInfo.GetFormattedTime().Last().ToString()) != int.Parse(presses[i].Last().ToString())) {
+                        string formattedTime;
+
+                        do {
+                            formattedTime = BombInfo.GetFormattedTime();
+
+                            if (BombInfo.GetTime() < 60f)
+                                formattedTime = BombInfo.GetFormattedTime().Substring(0, 2);
+
                             yield return new WaitForSeconds(0.1f);
-                        }
+                        } while (int.Parse(formattedTime.Last().ToString()) != int.Parse(presses[i].Last().ToString()));
                     }
                 } else if (Regex.IsMatch(presses[i], @"^[r|o|y|g|b|p]$")) {
                     var colorLetters = new[] { "r", "o", "y", "g", "b", "p" };
@@ -560,13 +567,28 @@ public class colourCodeModScript : MonoBehaviour {
             }
         }
 
-        if (Regex.IsMatch(command, @"^go [0-4]$")) {
-            while (int.Parse(BombInfo.GetFormattedTime().Last().ToString()) != int.Parse(command.Substring(3).Trim()))
-                    yield return new WaitForSeconds(0.1f);
+        if (Regex.IsMatch(command, @"^go \d\d$")) {
+            command = command.Substring(3);
 
-            yield return submitButton;
-            yield return new WaitForSeconds(0.1f);
-            yield return submitButton;
+            if (int.Parse(command) < 60) {
+                string formattedTime;
+
+                do {
+                    formattedTime = BombInfo.GetFormattedTime();
+
+                    if (BombInfo.GetTime() < 60f) {
+                        formattedTime = BombInfo.GetFormattedTime().Substring(0, 2);
+                    } else {
+                        formattedTime = formattedTime.Substring(formattedTime.Length - 2, 2);
+                    }
+
+                    yield return new WaitForSeconds(0.1f);
+                } while (int.Parse(formattedTime) != int.Parse(command.ToString()));
+
+                yield return submitButton;
+                yield return new WaitForSeconds(0.1f);
+                yield return submitButton;
+            }
         }
 
         yield break;
