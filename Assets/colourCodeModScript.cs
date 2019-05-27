@@ -21,6 +21,7 @@ public class colourCodeModScript : MonoBehaviour {
     public GameObject moduleBackground;
     public Material[] materials;
     public Material[] materialsLight;
+    public GameObject nothingText;
 
     private List<String> allTheDigits=new List<String>();
     private String myText="";
@@ -39,6 +40,8 @@ public class colourCodeModScript : MonoBehaviour {
 
     void Start() {
         moduleId = moduleIdCounter++;
+
+        nothingText.SetActive(false);
 
         String[] backgroundTranslationTable={"red","orange","yellow","green","blue","purple"};
         int newBackground=Random.Range(0, materials.Length - 1);
@@ -202,7 +205,7 @@ public class colourCodeModScript : MonoBehaviour {
             secondColour="blue";
         } else if(BombInfo.GetPortCount(Port.Parallel)>0) {
             secondColour="green";
-        } else if((BombInfo.GetBatteryCount()+BombInfo.GetSerialNumberNumbers().Sum())<=5) {
+        } else if(((BombInfo.GetBatteryCount()+BombInfo.GetSerialNumberNumbers().Sum())%10)<=5) {
             secondColour="orange";
         } else if(BombInfo.GetBatteryCount(Battery.AA)==BombInfo.GetBatteryCount()) {
             secondColour="red";
@@ -472,6 +475,7 @@ public class colourCodeModScript : MonoBehaviour {
         for(int i=0;i<screenPieces.Length;i++) {
             RenderBlock(i," ");
         }
+        nothingText.SetActive(false);
         if(moduleSolved) {
             screenText.Clear();
             screenText.Add("S");
@@ -482,13 +486,7 @@ public class colourCodeModScript : MonoBehaviour {
             screenText.Add("d");
         } else if(myText.Length==0) {
             screenText.Clear();
-            screenText.Add("H");
-            screenText.Add("e");
-            screenText.Add("l");
-            screenText.Add("p");
-            screenText.Add(" ");
-            screenText.Add("M");
-            screenText.Add("e");
+            nothingText.SetActive(true);
         }
         for(int i=0;i<screenText.Count;i++) {
             if(screenText[i].GetType()==typeof(Material)) {
@@ -560,6 +558,7 @@ public class colourCodeModScript : MonoBehaviour {
         }
 
         if (Regex.IsMatch(command, @"^delete [1-7]$")) {
+            yield return null;
             for (var i = 0; i < int.Parse(command.Substring(7).Trim()); i++) {
                 yield return deleteButton;
                 yield return new WaitForSeconds(0.1f);
