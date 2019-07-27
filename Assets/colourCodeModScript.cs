@@ -180,7 +180,7 @@ public class colourCodeModScript : MonoBehaviour {
         int bob1=100-(firstDigit+secondDigit+thirdDigit);
         int bob2=bob1-(getTotalModuleCountByName("Colour Code")+(BombInfo.GetSolvableModuleNames().Count()-BombInfo.GetSolvedModuleNames().Count()));
         int bob3=bob2+BombInfo.GetOffIndicators().Count();
-        int bob4=bob3%10;
+        int bob4=Math.Abs(bob3)%10;
         fourthDigit=bob4;
 
 

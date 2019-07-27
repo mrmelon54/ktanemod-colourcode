@@ -15,3 +15,12 @@ Version 3.0
 
 Version 3.3
   - Fixes for Twitch Plays
+
+Update 3.4
+  - Minor TP fixes
+
+Version 3.5
+  - Some more minor changes
+
+Version 3.6
+  - Fixed negative fourth digit bug
