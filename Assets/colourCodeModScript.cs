@@ -207,7 +207,7 @@ public class colourCodeModScript : MonoBehaviour {
             secondColour="green";
         } else if(((BombInfo.GetBatteryCount()+BombInfo.GetSerialNumberNumbers().Sum())%10)<=5) {
             secondColour="orange";
-        } else if(BombInfo.GetBatteryCount(Battery.AA)==BombInfo.GetBatteryCount()) {
+        } else if(BombInfo.GetBatteryCount(Battery.D)==0 && BombInfo.GetBatteryCount()>0) {
             secondColour="red";
         } else if(backgroundColour=="yellow") {
             secondColour="yellow";
