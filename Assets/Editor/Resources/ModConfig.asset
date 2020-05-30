@@ -14,9 +14,9 @@ MonoBehaviour:
   id: colourcode
   title: Colour Code
   author: MrMelon
-  description: "Colour Code 3.7\nCodes are used for locks! Why not colours?\n\r\nModule
+  description: "Colour Code 3.8\nCodes are used for locks! Why not colours?\n\r\nModule
     ID: colourcode\n\r\nCreated by: TheBrewer32 and MrMelon\n\nThanks to KingSlendy
     for optimising and writing the TP code\n\r\nManual available here:\r\nhttps://ktane.timwi.de/HTML/Colour%20Code.html"
-  version: 3.7
+  version: 3.8
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 130d2a34b8fc3454e9eedf82efea0184, type: 3}

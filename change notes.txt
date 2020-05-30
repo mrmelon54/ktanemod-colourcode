@@ -24,3 +24,9 @@ Version 3.5
 
 Version 3.6
   - Fixed negative fourth digit bug
+
+Version 3.7:
+  - Fixed colour 2 bug
+
+Version 3.8:
+  - Um go command seems to be stoppable now
