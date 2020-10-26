@@ -31,6 +31,7 @@ public class colourCodeModScript : MonoBehaviour
     private List<string> answerOrder = new List<String>();
     private string backgroundColour;
     private bool cancelGoCommand = false;
+    private bool bypassSubmitSeconds = false;
 
     int solvedModules;
 
@@ -466,6 +467,11 @@ public class colourCodeModScript : MonoBehaviour
         RenderScreen();
     }
 
+    int GetTimerSeconds()
+    {
+        return (int)Math.Floor(BombInfo.GetTime() / 1) % 60;
+    }
+
     void PressSubmitButton()
     {
         doLog("You entered: |" + myText + "|");
@@ -481,10 +487,11 @@ public class colourCodeModScript : MonoBehaviour
             if (ArrayCount(myTextSplit, "0") == 1 && ArrayCount(myTextSplit, "p") == 1)
             {
                 doLog("1 purple and 1 zero so submit can only be pressed on 40 or 04");
-                int seconds = int.Parse((BombInfo.GetTime() % 60).ToString().Split('.')[0]);
+                int seconds = GetTimerSeconds();
                 doLog("Current seconds figures are: " + seconds);
-                if (seconds == 40 || seconds == 4)
+                if (seconds == 40 || seconds == 4 || bypassSubmitSeconds)
                 {
+                    bypassSubmitSeconds = false;
                     doLog("This is correct");
                     moduleSolved = true;
                     BombModule.HandlePass();
@@ -719,23 +726,14 @@ public class colourCodeModScript : MonoBehaviour
 
             if (int.Parse(command) < 60)
             {
-                string formattedTime;
+                int StopTime = int.Parse(command.ToString());
+                int Seconds = GetTimerSeconds();
 
                 do
                 {
-                    formattedTime = BombInfo.GetFormattedTime();
-
-                    if (BombInfo.GetTime() < 60f)
-                    {
-                        formattedTime = BombInfo.GetFormattedTime().Substring(0, 2);
-                    }
-                    else
-                    {
-                        formattedTime = formattedTime.Substring(formattedTime.Length - 2, 2);
-                    }
-
-                    yield return "trywaitcancel 0.5 Stopped the go command";
-                } while (int.Parse(formattedTime) != int.Parse(command.ToString()) && !cancelGoCommand);
+                    Seconds = GetTimerSeconds();
+                    yield return "trywaitcancel 0.1 Stopped the go command";
+                } while (Seconds != StopTime && !cancelGoCommand);
 
                 if (cancelGoCommand)
                 {
@@ -745,6 +743,8 @@ public class colourCodeModScript : MonoBehaviour
                 }
                 else
                 {
+                    // my hacky solution to fix the submit button firing slightly earlier/later than the correct time
+                    if (StopTime == 40 || StopTime == 4) bypassSubmitSeconds = true;
                     yield return submitButton;
                     yield return new WaitForSeconds(0.1f);
                     yield return submitButton;

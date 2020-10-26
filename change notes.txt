@@ -30,3 +30,6 @@ Version 3.7:
 
 Version 3.8:
   - Um go command seems to be stoppable now
+
+Version 3.9:
+  - Rewrote the command for submitting the go button at a specific time
