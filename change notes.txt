@@ -33,3 +33,8 @@ Version 3.8:
 
 Version 3.9:
   - Rewrote the command for submitting the go button at a specific time
+
+Version 3.10:
+  - Fixed a bug in a regex statement in the press command
+  - Now stops the press command early if an invalid button is entered
+  - Added a version of the go command with no digits to press the button straight away

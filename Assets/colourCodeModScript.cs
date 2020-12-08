@@ -667,6 +667,8 @@ public class colourCodeModScript : MonoBehaviour
 
         if (Regex.IsMatch(command, @"^press +[0-9roygbps|]+$"))
         {
+            yield return null;
+
             command = command.Substring(6).Trim();
             var presses = command.Split('|');
 
@@ -693,14 +695,15 @@ public class colourCodeModScript : MonoBehaviour
                         } while (int.Parse(formattedTime.Last().ToString()) != int.Parse(presses[i].Last().ToString()));
                     }
                 }
-                else if (Regex.IsMatch(presses[i], @"^[r|o|y|g|b|p]$"))
+                else if (Regex.IsMatch(presses[i], @"^[roygbp]$"))
                 {
                     var colorLetters = new[] { "r", "o", "y", "g", "b", "p" };
                     pressButton = ColouredButtons[Array.IndexOf(colorLetters, presses[i])];
                 }
                 else
                 {
-                    continue;
+                    yield return "sendtochat Couldn't interpret \"" + presses[i] + "\" so the command stopped running";
+                    break;
                 }
 
                 yield return pressButton;
@@ -708,8 +711,7 @@ public class colourCodeModScript : MonoBehaviour
                 yield return pressButton;
             }
         }
-
-        if (Regex.IsMatch(command, @"^delete [1-7]$"))
+        else if (Regex.IsMatch(command, @"^delete [1-7]$"))
         {
             yield return null;
             for (var i = 0; i < int.Parse(command.Substring(7).Trim()); i++)
@@ -719,9 +721,16 @@ public class colourCodeModScript : MonoBehaviour
                 yield return deleteButton;
             }
         }
-
-        if (Regex.IsMatch(command, @"^go \d\d$"))
+        else if (Regex.IsMatch(command, @"^go$"))
         {
+            yield return null;
+
+            yield return submitButton;
+        }
+        else if (Regex.IsMatch(command, @"^go \d\d$"))
+        {
+            yield return null;
+
             command = command.Substring(3);
 
             if (int.Parse(command) < 60)
@@ -750,6 +759,10 @@ public class colourCodeModScript : MonoBehaviour
                     yield return submitButton;
                 }
             }
+        }
+        else
+        {
+            yield return "sendtochat The command entered was invalid";
         }
 
         yield break;
