@@ -38,3 +38,7 @@ Version 3.10:
   - Fixed a bug in a regex statement in the press command
   - Now stops the press command early if an invalid button is entered
   - Added a version of the go command with no digits to press the button straight away
+
+Version 3.11:
+  - Tried to fix Twitch Plays pressing the button but the module not thinking the time is correct
+  - Added a way to quit the command processing loop if the timer is at 0 already

@@ -421,9 +421,9 @@ public class colourCodeModScript : MonoBehaviour
 
         if (ArrayCountAnArray(myTextSplit, "0.1.2.3.4.5.6.7.8.9".Split('.')) == 2)
         {
-            int TimerAsInteger = int.Parse(BombInfo.GetTime().ToString().Split('.')[0]);
-            if (((TimerAsInteger % 60) % 10).ToString() == buttonText)
-            {
+            string formattedTime = BombInfo.GetTime() < 60f ? BombInfo.GetFormattedTime().Substring(0,2) : BombInfo.GetFormattedTime();
+
+            if(formattedTime.Last().ToString() == buttonText) {
                 myText += buttonText;
             }
             else
@@ -674,25 +674,32 @@ public class colourCodeModScript : MonoBehaviour
 
             for (var i = 0; i < presses.Length; i++)
             {
+                // If the bomb is already dead why keep trying
+                if(BombInfo.GetTime()==0) {
+                    break;
+                }
+
                 KMSelectable pressButton;
 
-                if (Regex.IsMatch(presses[i], @"^[0-9]$") || Regex.IsMatch(presses[i], @"^[0-9]s[0-9]$"))
+                if (Regex.IsMatch(presses[i], @"^[0-9](s[0-9])?$"))
                 {
                     pressButton = NumberedButtons[int.Parse(presses[i].First().ToString())];
 
                     if (Regex.IsMatch(presses[i], @"^[0-9]s[0-9]$"))
                     {
-                        string formattedTime;
+                        string formattedTime = "";
 
                         do
                         {
-                            formattedTime = BombInfo.GetFormattedTime();
+                            // If the bomb is already dead why keep trying
+                            if(BombInfo.GetTime() == 0) {
+                                pressButton = null;
+                                break;
+                            }
 
-                            if (BombInfo.GetTime() < 60f)
-                                formattedTime = BombInfo.GetFormattedTime().Substring(0, 2);
-
+                            formattedTime = BombInfo.GetTime() < 60f ? BombInfo.GetFormattedTime().Substring(0,2) : BombInfo.GetFormattedTime();
                             yield return new WaitForSeconds(0.1f);
-                        } while (int.Parse(formattedTime.Last().ToString()) != int.Parse(presses[i].Last().ToString()));
+                        } while (formattedTime.Last().ToString() != presses[i].Last().ToString());
                     }
                 }
                 else if (Regex.IsMatch(presses[i], @"^[roygbp]$"))
@@ -706,9 +713,11 @@ public class colourCodeModScript : MonoBehaviour
                     break;
                 }
 
-                yield return pressButton;
-                yield return new WaitForSeconds(0.1f);
-                yield return pressButton;
+                if(pressButton != null) {
+                    yield return pressButton;
+                    yield return new WaitForSeconds(0.1f);
+                    yield return pressButton;
+                }
             }
         }
         else if (Regex.IsMatch(command, @"^delete [1-7]$"))
