@@ -42,3 +42,6 @@ Version 3.10:
 Version 3.11:
   - Tried to fix Twitch Plays pressing the button but the module not thinking the time is correct
   - Added a way to quit the command processing loop if the timer is at 0 already
+
+Version 3.12:
+  - Still fixing Twitch Plays pressing the button at the right time

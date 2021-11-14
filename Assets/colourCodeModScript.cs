@@ -7,8 +7,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class colourCodeModScript : MonoBehaviour
-{
+public class colourCodeModScript : MonoBehaviour {
     public KMAudio BombAudio;
     public KMBombInfo BombInfo;
     public KMBombModule BombModule;
@@ -36,12 +35,12 @@ public class colourCodeModScript : MonoBehaviour
     int solvedModules;
 
     bool moduleSolved;
+    bool usingTwitchPlaysCommand;
 
     static int moduleIdCounter = 1;
     int moduleId;
 
-    void Start()
-    {
+    void Start() {
         moduleId = moduleIdCounter++;
 
         nothingText.SetActive(false);
@@ -55,37 +54,31 @@ public class colourCodeModScript : MonoBehaviour
         CalculateDigitOrder();
         PrepareCorrectAnswer();
 
-        for (int i = 0; i < NumberedButtons.Length; i++)
-        {
+        for (int i = 0; i < NumberedButtons.Length; i++) {
             int j = i;
 
-            NumberedButtons[i].OnInteract += delegate ()
-            {
+            NumberedButtons[i].OnInteract += delegate () {
                 PressNumberedButton(j);
 
                 return false;
             };
         }
 
-        for (int i = 0; i < ColouredButtons.Length; i++)
-        {
+        for (int i = 0; i < ColouredButtons.Length; i++) {
             int j = i;
 
-            ColouredButtons[i].OnInteract += delegate ()
-            {
+            ColouredButtons[i].OnInteract += delegate () {
                 PressColouredButton(j);
 
                 return false;
             };
         }
 
-        submitButton.OnInteract += delegate ()
-        {
+        submitButton.OnInteract += delegate () {
             PressSubmitButton();
             return false;
         };
-        deleteButton.OnInteract += delegate ()
-        {
+        deleteButton.OnInteract += delegate () {
             PressDeleteButton();
             return false;
         };
@@ -93,10 +86,8 @@ public class colourCodeModScript : MonoBehaviour
 
     int LastModulesSolved = 0;
 
-    void Update()
-    {
-        if (!moduleSolved && LastModulesSolved != BombInfo.GetSolvedModuleNames().Count())
-        {
+    void Update() {
+        if (!moduleSolved && LastModulesSolved != BombInfo.GetSolvedModuleNames().Count()) {
             CalculateCorrectAnswer();
             CalculateDigitOrder();
             PrepareCorrectAnswer();
@@ -104,114 +95,70 @@ public class colourCodeModScript : MonoBehaviour
         }
     }
 
-    int getTotalModuleCountByName(string n)
-    {
+    int getTotalModuleCountByName(string n) {
         return BombInfo.GetSolvableModuleNames().Count(x => x == n);
     }
-    int getSolvedModuleCountByName(string n)
-    {
+    int getSolvedModuleCountByName(string n) {
         return BombInfo.GetSolvedModuleNames().Count(x => x == n);
     }
-    int getUnsolvedModuleCountByName(string n)
-    {
+    int getUnsolvedModuleCountByName(string n) {
         return getTotalModuleCountByName(n) - getSolvedModuleCountByName(n);
     }
 
-    void doLog(string m)
-    {
+    void doLog(string m) {
         Debug.LogFormat("[Colour Code #{0}] {1}", moduleId, m);
     }
 
-    void CalculateCorrectAnswer()
-    {
+    void CalculateCorrectAnswer() {
         int firstDigit = 0;
-        if (BombInfo.GetBatteryCount() <= 1)
-        {
+        if (BombInfo.GetBatteryCount() <= 1) {
             firstDigit = 3;
-        }
-        else if (BombInfo.IsIndicatorOn("FRK"))
-        {
+        } else if (BombInfo.IsIndicatorOn("FRK")) {
             firstDigit = 6;
-        }
-        else if (BombInfo.GetPortCount() > BombInfo.GetBatteryCount())
-        {
+        } else if (BombInfo.GetPortCount() > BombInfo.GetBatteryCount()) {
             firstDigit = 7;
-        }
-        else if (BombInfo.GetOnIndicators().Count() > BombInfo.GetSolvedModuleNames().Count())
-        {
+        } else if (BombInfo.GetOnIndicators().Count() > BombInfo.GetSolvedModuleNames().Count()) {
             firstDigit = 9;
-        }
-        else if ((BombInfo.GetOnIndicators().Count() + BombInfo.GetOffIndicators().Count() + BombInfo.GetPortCount()) < getTotalModuleCountByName("Colour Code"))
-        {
+        } else if ((BombInfo.GetOnIndicators().Count() + BombInfo.GetOffIndicators().Count() + BombInfo.GetPortCount()) < getTotalModuleCountByName("Colour Code")) {
             firstDigit = 2;
-        }
-        else if (BombInfo.GetBatteryCount() < getTotalModuleCountByName("Planets"))
-        {
+        } else if (BombInfo.GetBatteryCount() < getTotalModuleCountByName("Planets")) {
             firstDigit = 5;
-        }
-        else if ((BombInfo.GetSolvableModuleNames().Count() - BombInfo.GetSolvedModuleNames().Count()) > 40)
-        {
+        } else if ((BombInfo.GetSolvableModuleNames().Count() - BombInfo.GetSolvedModuleNames().Count()) > 40) {
             firstDigit = 8;
-        }
-        else if (BombInfo.GetBatteryCount(Battery.AA) == 2 && BombInfo.GetBatteryCount(Battery.D) == 2)
-        {
+        } else if (BombInfo.GetBatteryCount(Battery.AA) == 2 && BombInfo.GetBatteryCount(Battery.D) == 2) {
             firstDigit = 1;
-        }
-        else if ((BombInfo.GetSolvableModuleNames().Count() / 2) < BombInfo.GetSolvedModuleNames().Count())
-        {
+        } else if ((BombInfo.GetSolvableModuleNames().Count() / 2) < BombInfo.GetSolvedModuleNames().Count()) {
             firstDigit = 4;
         }
 
 
         int secondDigit = 0;
-        if (backgroundColour == "red")
-        {
-            if (BombInfo.GetPortCount(Port.Parallel) > 0)
-            {
+        if (backgroundColour == "red") {
+            if (BombInfo.GetPortCount(Port.Parallel) > 0) {
                 secondDigit = 5;
-            }
-            else
-            {
+            } else {
                 secondDigit = 3;
             }
-        }
-        else if (backgroundColour == "orange")
-        {
-            if (BombInfo.GetBatteryCount() > (BombInfo.GetIndicators().Count() - BombInfo.GetPortCount()))
-            {
+        } else if (backgroundColour == "orange") {
+            if (BombInfo.GetBatteryCount() > (BombInfo.GetIndicators().Count() - BombInfo.GetPortCount())) {
                 secondDigit = 9;
-            }
-            else
-            {
+            } else {
                 secondDigit = 4;
             }
-        }
-        else if (backgroundColour == "green")
-        {
-            if (BombInfo.GetOnIndicators().Count() > getTotalModuleCountByName("Planets"))
-            {
+        } else if (backgroundColour == "green") {
+            if (BombInfo.GetOnIndicators().Count() > getTotalModuleCountByName("Planets")) {
                 secondDigit = 8;
-            }
-            else
-            {
+            } else {
                 secondDigit = 1;
             }
-        }
-        else if (backgroundColour == "yellow")
-        {
-            if ((getUnsolvedModuleCountByName("Colour Code") + getUnsolvedModuleCountByName("Planets")) > (getSolvedModuleCountByName("Colour Code") + getSolvedModuleCountByName("Planets")))
-            {
+        } else if (backgroundColour == "yellow") {
+            if ((getUnsolvedModuleCountByName("Colour Code") + getUnsolvedModuleCountByName("Planets")) > (getSolvedModuleCountByName("Colour Code") + getSolvedModuleCountByName("Planets"))) {
                 secondDigit = 7;
-            }
-            else
-            {
+            } else {
                 secondDigit = 2;
             }
-        }
-        else if (backgroundColour == "blue")
-        {
-            if ((BombInfo.GetSolvableModuleNames().Count() - BombInfo.GetSolvedModuleNames().Count()) == 1)
-            {
+        } else if (backgroundColour == "blue") {
+            if ((BombInfo.GetSolvableModuleNames().Count() - BombInfo.GetSolvedModuleNames().Count()) == 1) {
                 secondDigit = 6;
             }
         }
@@ -241,48 +188,30 @@ public class colourCodeModScript : MonoBehaviour
 
 
         string firstColour = "purple"; // default to purple
-        if (backgroundColour == "red" && BombInfo.GetPortCount() == 0 && BombInfo.GetIndicators().Count() == 0 && BombInfo.GetSolvedModuleNames().Count() == 0)
-        {
+        if (backgroundColour == "red" && BombInfo.GetPortCount() == 0 && BombInfo.GetIndicators().Count() == 0 && BombInfo.GetSolvedModuleNames().Count() == 0) {
             firstColour = "red";
-        }
-        else if (backgroundColour == "orange" && BombInfo.GetSerialNumberNumbers().Sum() % 10 == BombInfo.GetBatteryCount())
-        {
+        } else if (backgroundColour == "orange" && BombInfo.GetSerialNumberNumbers().Sum() % 10 == BombInfo.GetBatteryCount()) {
             firstColour = "orange";
-        }
-        else if (backgroundColour == "green" && BombInfo.GetPortCount() > BombInfo.GetOffIndicators().Count())
-        {
+        } else if (backgroundColour == "green" && BombInfo.GetPortCount() > BombInfo.GetOffIndicators().Count()) {
             firstColour = "green";
-        }
-        else if (backgroundColour == "yellow" && BombInfo.GetOffIndicators().Count() == 1 && BombInfo.GetSerialNumberNumbers().Last() % 2 == 1)
-        {
+        } else if (backgroundColour == "yellow" && BombInfo.GetOffIndicators().Count() == 1 && BombInfo.GetSerialNumberNumbers().Last() % 2 == 1) {
             firstColour = "yellow";
-        }
-        else if (backgroundColour == "blue" && BombInfo.GetBatteryCount() == BombInfo.GetSolvedModuleNames().Count())
-        {
+        } else if (backgroundColour == "blue" && BombInfo.GetBatteryCount() == BombInfo.GetSolvedModuleNames().Count()) {
             firstColour = "blue";
         }
 
 
 
         string secondColour = "purple"; // default to purple
-        if (BombInfo.GetSerialNumberNumbers().Last() % 2 == 0)
-        {
+        if (BombInfo.GetSerialNumberNumbers().Last() % 2 == 0) {
             secondColour = "blue";
-        }
-        else if (BombInfo.GetPortCount(Port.Parallel) > 0)
-        {
+        } else if (BombInfo.GetPortCount(Port.Parallel) > 0) {
             secondColour = "green";
-        }
-        else if (((BombInfo.GetBatteryCount() + BombInfo.GetSerialNumberNumbers().Sum()) % 10) <= 5)
-        {
+        } else if (((BombInfo.GetBatteryCount() + BombInfo.GetSerialNumberNumbers().Sum()) % 10) <= 5) {
             secondColour = "orange";
-        }
-        else if (BombInfo.GetBatteryCount(Battery.D) == 0 && BombInfo.GetBatteryCount() > 0)
-        {
+        } else if (BombInfo.GetBatteryCount(Battery.D) == 0 && BombInfo.GetBatteryCount() > 0) {
             secondColour = "red";
-        }
-        else if (backgroundColour == "yellow")
-        {
+        } else if (backgroundColour == "yellow") {
             secondColour = "yellow";
         }
 
@@ -319,17 +248,12 @@ public class colourCodeModScript : MonoBehaviour
         doLog("Colour 3 = " + thirdColour);
     }
 
-    void CalculateDigitOrder()
-    {
+    void CalculateDigitOrder() {
         List<string> productDigits = new List<string>();
-        for (int i = 0; i < 4; i++)
-        {
-            if (int.Parse(allTheDigits[i]) == 0)
-            {
+        for (int i = 0; i < 4; i++) {
+            if (int.Parse(allTheDigits[i]) == 0) {
                 productDigits.Add((1).ToString());
-            }
-            else
-            {
+            } else {
                 productDigits.Add(allTheDigits[i]);
             }
         }
@@ -344,27 +268,40 @@ public class colourCodeModScript : MonoBehaviour
         bool con7 = BombInfo.GetSerialNumberLetters().Count() == 3;
 
         answerOrder.Clear();
-        if (con1) answerOrder.Add("digit");
-        if (con2) answerOrder.Add("colour");
-        if (con3) answerOrder.Add("digit");
-        if (con4) answerOrder.Add("colour");
-        if (con5) answerOrder.Add("digit");
-        if (con6) answerOrder.Add("colour");
-        if (con7) answerOrder.Add("digit");
+        if (con1)
+            answerOrder.Add("digit");
+        if (con2)
+            answerOrder.Add("colour");
+        if (con3)
+            answerOrder.Add("digit");
+        if (con4)
+            answerOrder.Add("colour");
+        if (con5)
+            answerOrder.Add("digit");
+        if (con6)
+            answerOrder.Add("colour");
+        if (con7)
+            answerOrder.Add("digit");
 
-        if (!con7) answerOrder.Add("digit");
-        if (!con6) answerOrder.Add("colour");
-        if (!con5) answerOrder.Add("digit");
-        if (!con4) answerOrder.Add("colour");
-        if (!con3) answerOrder.Add("digit");
-        if (!con2) answerOrder.Add("colour");
-        if (!con1) answerOrder.Add("digit");
+        if (!con7)
+            answerOrder.Add("digit");
+        if (!con6)
+            answerOrder.Add("colour");
+        if (!con5)
+            answerOrder.Add("digit");
+        if (!con4)
+            answerOrder.Add("colour");
+        if (!con3)
+            answerOrder.Add("digit");
+        if (!con2)
+            answerOrder.Add("colour");
+        if (!con1)
+            answerOrder.Add("digit");
 
         doLog("Order of digits conditions = " + con1.ToString() + " " + con2.ToString() + " " + con3.ToString() + " " + con4.ToString() + " " + con5.ToString() + " " + con6.ToString() + " " + con7.ToString());
     }
 
-    void PrepareCorrectAnswer()
-    {
+    void PrepareCorrectAnswer() {
         finalText.Clear();
 
         int _dp = 1;
@@ -372,18 +309,16 @@ public class colourCodeModScript : MonoBehaviour
 
         string _logText = "Order of digits = ";
 
-        for (int i = 0; i < answerOrder.Count; i++)
-        {
-            if (answerOrder[i] == "digit")
-            {
+        for (int i = 0; i < answerOrder.Count; i++) {
+            if (answerOrder[i] == "digit") {
                 finalText.Add(_dp == 1 ? allTheDigits[0] : _dp == 2 ? allTheDigits[1] : _dp == 3 ? allTheDigits[2] : allTheDigits[3]);
-                if (i != answerOrder.Count()) _logText += "d" + _dp.ToString() + ", ";
+                if (i != answerOrder.Count())
+                    _logText += "d" + _dp.ToString() + ", ";
                 _dp++;
-            }
-            else
-            {
+            } else {
                 finalText.Add(_cp == 1 ? allTheDigits[4] : _cp == 2 ? allTheDigits[5] : allTheDigits[6]);
-                if (i != answerOrder.Count()) _logText += "c" + _cp.ToString() + ", ";
+                if (i != answerOrder.Count())
+                    _logText += "c" + _cp.ToString() + ", ";
                 _cp++;
             }
         }
@@ -391,8 +326,7 @@ public class colourCodeModScript : MonoBehaviour
         doLog(_logText);
 
         answerText = "";
-        for (int i = 0; i < finalText.Count; i++)
-        {
+        for (int i = 0; i < finalText.Count; i++) {
             string c = finalText[i];
             answerText += c == "orange" ? "o" : c == "blue" ? "b" : c == "red" ? "r" : c == "purple" ? "p" : c == "yellow" ? "y" : c == "green" ? "g" : c;
         }
@@ -400,45 +334,37 @@ public class colourCodeModScript : MonoBehaviour
         doLog("Correct answer is: " + answerText);
     }
 
-    void PressNumberedButton(int buttonId)
-    {
+    void PressNumberedButton(int buttonId) {
         BombAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         ModuleSelect.AddInteractionPunch();
 
-        if (moduleSolved)
-        {
+        if (moduleSolved) {
             return;
         }
 
         string buttonText = NumberedButtons[buttonId].gameObject.name.Replace("Button", "");
 
         string myTextSpliting = "";
-        for (int i = 0; i < myText.Length; i++)
-        {
+        for (int i = 0; i < myText.Length; i++) {
             myTextSpliting += myText[i] + ".";
         }
         string[] myTextSplit = myTextSpliting.Split('.');
 
-        if (ArrayCountAnArray(myTextSplit, "0.1.2.3.4.5.6.7.8.9".Split('.')) == 2)
-        {
-            string formattedTime = BombInfo.GetTime() < 60f ? BombInfo.GetFormattedTime().Substring(0,2) : BombInfo.GetFormattedTime();
+        if (ArrayCountAnArray(myTextSplit, "0.1.2.3.4.5.6.7.8.9".Split('.')) == 2) {
+            string formattedTime = BombInfo.GetTime() < 60f ? BombInfo.GetFormattedTime().Substring(0, 2) : BombInfo.GetFormattedTime();
 
-            if(formattedTime.Last().ToString() == buttonText) {
+            if (formattedTime.Last().ToString() == buttonText || usingTwitchPlaysCommand) {
+                usingTwitchPlaysCommand = false;
                 myText += buttonText;
-            }
-            else
-            {
+            } else {
                 doLog("Press this digit when the last digit of the seconds is equal to it");
                 BombModule.HandleStrike();
             }
-        }
-        else
-        {
+        } else {
             myText += buttonText;
         }
 
-        if (myText.Length > 7)
-        {
+        if (myText.Length > 7) {
             myText = myText.Remove(myText.Length - 1, 1);
         }
 
@@ -446,20 +372,17 @@ public class colourCodeModScript : MonoBehaviour
         RenderScreen();
     }
 
-    void PressColouredButton(int buttonId)
-    {
+    void PressColouredButton(int buttonId) {
         BombAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         ModuleSelect.AddInteractionPunch();
 
-        if (moduleSolved)
-        {
+        if (moduleSolved) {
             return;
         }
 
         myText += ColouredButtons[buttonId].gameObject.name.Replace("Button", "");
 
-        if (myText.Length > 7)
-        {
+        if (myText.Length > 7) {
             myText = myText.Remove(myText.Length - 1, 1);
         }
 
@@ -467,59 +390,45 @@ public class colourCodeModScript : MonoBehaviour
         RenderScreen();
     }
 
-    int GetTimerSeconds()
-    {
+    int GetTimerSeconds() {
         return (int)Math.Floor(BombInfo.GetTime() / 1) % 60;
     }
 
-    void PressSubmitButton()
-    {
+    void PressSubmitButton() {
         doLog("You entered: |" + myText + "|");
         doLog("Correct answer: |" + answerText + "|");
-        if (string.Equals(myText, answerText))
-        {
+        if (string.Equals(myText, answerText)) {
             string myTextSpliting = "";
-            for (int i = 0; i < myText.Length; i++)
-            {
+            for (int i = 0; i < myText.Length; i++) {
                 myTextSpliting += myText[i] + ".";
             }
             string[] myTextSplit = myTextSpliting.Split('.');
-            if (ArrayCount(myTextSplit, "0") == 1 && ArrayCount(myTextSplit, "p") == 1)
-            {
+            if (ArrayCount(myTextSplit, "0") == 1 && ArrayCount(myTextSplit, "p") == 1) {
                 doLog("1 purple and 1 zero so submit can only be pressed on 40 or 04");
                 int seconds = GetTimerSeconds();
                 doLog("Current seconds figures are: " + seconds);
-                if (seconds == 40 || seconds == 4 || bypassSubmitSeconds)
-                {
+                if (seconds == 40 || seconds == 4 || bypassSubmitSeconds) {
                     bypassSubmitSeconds = false;
                     doLog("This is correct");
                     moduleSolved = true;
                     BombModule.HandlePass();
                     RenderScreen();
-                }
-                else
-                {
+                } else {
                     doLog("Invalid it must say 40 or 04");
                     BombModule.HandleStrike();
                 }
-            }
-            else
-            {
+            } else {
                 moduleSolved = true;
                 BombModule.HandlePass();
                 RenderScreen();
             }
-        }
-        else
-        {
+        } else {
             BombModule.HandleStrike();
         }
     }
 
-    void PressDeleteButton()
-    {
-        if (myText.Length > 0)
-        {
+    void PressDeleteButton() {
+        if (myText.Length > 0) {
             myText = myText.Remove(myText.Length - 1, 1);
             PrepareRenderReadyText();
             RenderScreen();
@@ -528,28 +437,21 @@ public class colourCodeModScript : MonoBehaviour
 
 
 
-    int ArrayCount(string[] a, string b)
-    {
+    int ArrayCount(string[] a, string b) {
         int o = 0;
-        for (int i = 0; i < a.Length; i++)
-        {
-            if (string.Equals(a[i], b))
-            {
+        for (int i = 0; i < a.Length; i++) {
+            if (string.Equals(a[i], b)) {
                 o++;
             }
         }
         return o;
     }
 
-    int ArrayCountAnArray(string[] a, string[] b)
-    {
+    int ArrayCountAnArray(string[] a, string[] b) {
         int o = 0;
-        for (int i = 0; i < a.Length; i++)
-        {
-            for (int j = 0; j < b.Length; j++)
-            {
-                if (string.Equals(a[i], b[j]))
-                {
+        for (int i = 0; i < a.Length; i++) {
+            for (int j = 0; j < b.Length; j++) {
+                if (string.Equals(a[i], b[j])) {
                     o++;
                     break;
                 }
@@ -558,21 +460,17 @@ public class colourCodeModScript : MonoBehaviour
         return o;
     }
 
-    void PrepareRenderReadyText()
-    {
+    void PrepareRenderReadyText() {
         myText = myText.ToLower();
         string myTextSpliting = "";
-        for (int i = 0; i < myText.Length; i++)
-        {
+        for (int i = 0; i < myText.Length; i++) {
             myTextSpliting += myText[i] + ".";
         }
         string[] myTextSplit = myTextSpliting.Split('.');
         screenText.Clear();
-        for (int i = 0; i < myTextSplit.Length; i++)
-        {
+        for (int i = 0; i < myTextSplit.Length; i++) {
             string c = myTextSplit[i];
-            switch (c)
-            {
+            switch (c) {
                 case "r":
                     screenText.Add(materialsLight[0]);
                     break;
@@ -598,15 +496,12 @@ public class colourCodeModScript : MonoBehaviour
         }
     }
 
-    void RenderScreen()
-    {
-        for (int i = 0; i < screenPieces.Length; i++)
-        {
+    void RenderScreen() {
+        for (int i = 0; i < screenPieces.Length; i++) {
             RenderBlock(i, " ");
         }
         nothingText.SetActive(false);
-        if (moduleSolved)
-        {
+        if (moduleSolved) {
             screenText.Clear();
             screenText.Add("S");
             screenText.Add("o");
@@ -614,41 +509,33 @@ public class colourCodeModScript : MonoBehaviour
             screenText.Add("v");
             screenText.Add("e");
             screenText.Add("d");
-        }
-        else if (myText.Length == 0)
-        {
+        } else if (myText.Length == 0) {
             screenText.Clear();
             nothingText.SetActive(true);
         }
-        for (int i = 0; i < screenText.Count; i++)
-        {
-            if (screenText[i].GetType() == typeof(Material))
-            {
+        for (int i = 0; i < screenText.Count; i++) {
+            if (screenText[i].GetType() == typeof(Material)) {
                 RenderBlock(i, (Material)screenText[i]);
-            }
-            else if (screenText[i].GetType() == typeof(string))
-            {
+            } else if (screenText[i].GetType() == typeof(string)) {
                 RenderBlock(i, (string)screenText[i]);
-            }
-            else
-            {
+            } else {
                 RenderBlock(i, " ");
             }
         }
     }
 
-    void RenderBlock(int i, string m)
-    {
-        if (i >= 7) return;
+    void RenderBlock(int i, string m) {
+        if (i >= 7)
+            return;
         Transform pos = screenPieces[i].transform;
         pos.GetChild(0).gameObject.SetActive(true);
         pos.GetChild(1).gameObject.SetActive(false);
         pos.GetChild(0).gameObject.GetComponent<TextMesh>().text = m;
     }
 
-    void RenderBlock(int i, Material m)
-    {
-        if (i >= 7) return;
+    void RenderBlock(int i, Material m) {
+        if (i >= 7)
+            return;
         Transform pos = screenPieces[i].transform;
         pos.GetChild(0).gameObject.SetActive(false);
         pos.GetChild(1).gameObject.SetActive(true);
@@ -659,118 +546,96 @@ public class colourCodeModScript : MonoBehaviour
     private readonly string TwitchHelpMessage = @"Submit your answer with “!{0} press 1|R|Y|9|P|0s0|3 (add sX [where 'X' is a digit] to press the button when the last seconds digit of the bomb is 'X')”. Delete screen with “!{0} delete 5 (number of times to press the button)”. Submit answer with “!{0} go 40 (submit when the seconds of the bomb is the number)”. Cancel submitting the answer with “!{0} go cancel/c/stop (stop submitting the answer)”.";
 #pragma warning restore 414
 
-    IEnumerator ProcessTwitchCommand(string command)
-    {
+    IEnumerator ProcessTwitchCommand(string command) {
         command = command.ToLowerInvariant().Trim();
 
         yield return null;
 
-        if (Regex.IsMatch(command, @"^press +[0-9roygbps|]+$"))
-        {
+        if (Regex.IsMatch(command, @"^press +[0-9roygbps|]+$")) {
             yield return null;
 
             command = command.Substring(6).Trim();
             var presses = command.Split('|');
 
-            for (var i = 0; i < presses.Length; i++)
-            {
+            for (var i = 0; i < presses.Length; i++) {
                 // If the bomb is already dead why keep trying
-                if(BombInfo.GetTime()==0) {
+                if (BombInfo.GetTime() == 0) {
                     break;
                 }
 
                 KMSelectable pressButton;
 
-                if (Regex.IsMatch(presses[i], @"^[0-9](s[0-9])?$"))
-                {
+                if (Regex.IsMatch(presses[i], @"^[0-9](s[0-9])?$")) {
                     pressButton = NumberedButtons[int.Parse(presses[i].First().ToString())];
 
-                    if (Regex.IsMatch(presses[i], @"^[0-9]s[0-9]$"))
-                    {
+                    if (Regex.IsMatch(presses[i], @"^[0-9]s[0-9]$")) {
                         string formattedTime = "";
 
-                        do
-                        {
+                        do {
                             // If the bomb is already dead why keep trying
-                            if(BombInfo.GetTime() == 0) {
+                            if (BombInfo.GetTime() == 0) {
                                 pressButton = null;
                                 break;
                             }
 
-                            formattedTime = BombInfo.GetTime() < 60f ? BombInfo.GetFormattedTime().Substring(0,2) : BombInfo.GetFormattedTime();
+                            formattedTime = BombInfo.GetTime() < 60f ? BombInfo.GetFormattedTime().Substring(0, 2) : BombInfo.GetFormattedTime();
                             yield return new WaitForSeconds(0.1f);
                         } while (formattedTime.Last().ToString() != presses[i].Last().ToString());
+                        usingTwitchPlaysCommand = true;
                     }
-                }
-                else if (Regex.IsMatch(presses[i], @"^[roygbp]$"))
-                {
+                } else if (Regex.IsMatch(presses[i], @"^[roygbp]$")) {
                     var colorLetters = new[] { "r", "o", "y", "g", "b", "p" };
                     pressButton = ColouredButtons[Array.IndexOf(colorLetters, presses[i])];
-                }
-                else
-                {
+                } else {
                     yield return "sendtochat Couldn't interpret \"" + presses[i] + "\" so the command stopped running";
                     break;
                 }
 
-                if(pressButton != null) {
+                if (pressButton != null) {
                     yield return pressButton;
                     yield return new WaitForSeconds(0.1f);
                     yield return pressButton;
                 }
             }
-        }
-        else if (Regex.IsMatch(command, @"^delete [1-7]$"))
-        {
+        } else if (Regex.IsMatch(command, @"^delete [1-7]$")) {
             yield return null;
-            for (var i = 0; i < int.Parse(command.Substring(7).Trim()); i++)
-            {
+            for (var i = 0; i < int.Parse(command.Substring(7).Trim()); i++) {
                 yield return deleteButton;
                 yield return new WaitForSeconds(0.1f);
                 yield return deleteButton;
             }
-        }
-        else if (Regex.IsMatch(command, @"^go$"))
-        {
+        } else if (Regex.IsMatch(command, @"^go$")) {
             yield return null;
 
             yield return submitButton;
-        }
-        else if (Regex.IsMatch(command, @"^go \d\d$"))
-        {
+        } else if (Regex.IsMatch(command, @"^go \d\d$")) {
             yield return null;
 
             command = command.Substring(3);
 
-            if (int.Parse(command) < 60)
-            {
+            if (int.Parse(command) < 60) {
                 int StopTime = int.Parse(command.ToString());
                 int Seconds = GetTimerSeconds();
 
-                do
-                {
+                do {
                     Seconds = GetTimerSeconds();
                     yield return "trywaitcancel 0.1 Stopped the go command";
                 } while (Seconds != StopTime && !cancelGoCommand);
 
-                if (cancelGoCommand)
-                {
+                if (cancelGoCommand) {
                     doLog("Caught stop request");
                     cancelGoCommand = false;
                     yield return null;
-                }
-                else
-                {
+                } else {
                     // my hacky solution to fix the submit button firing slightly earlier/later than the correct time
-                    if (StopTime == 40 || StopTime == 4) bypassSubmitSeconds = true;
+                    if (StopTime == 40 || StopTime == 4)
+                        bypassSubmitSeconds = true;
                     yield return submitButton;
                     yield return new WaitForSeconds(0.1f);
                     yield return submitButton;
                 }
             }
-        }
-        else
-        {
+        } else {
             yield return "sendtochat The command entered was invalid";
         }
 
