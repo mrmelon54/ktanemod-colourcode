@@ -1,0 +1,10 @@
+{
+  "name": "colourcode-Editor",
+  "references": [
+    "colourcode"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}

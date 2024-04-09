@@ -45,3 +45,6 @@ Version 3.11:
 
 Version 3.12:
   - Still fixing Twitch Plays pressing the button at the right time
+
+Version 3.13:
+  - Update modkit
